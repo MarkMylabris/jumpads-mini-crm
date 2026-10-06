@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Вход — Mini CRM{% endblock %}
+{% block content %}
+<article style="max-width: 420px; margin: 4rem auto;">
+  <header><strong>Вход в Mini CRM</strong></header>
+  <form method="post" action="/login">
+    <input type="hidden" name="next" value="{{ next }}">
+    <label>Логин <input name="username" value="{{ username or '' }}" autocomplete="username" required autofocus></label>
+    <label>Пароль <input type="password" name="password" autocomplete="current-password" required
+      {% if error %}aria-invalid="true"{% endif %}></label>
+    {% if error %}<p class="field-error">{{ error }}</p>{% endif %}
+    <button type="submit">Войти</button>
+  </form>
+</article>
+{% endblock %}

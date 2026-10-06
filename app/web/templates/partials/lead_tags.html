@@ -1,0 +1,22 @@
+{# Tag chips + dropdown to toggle tags; used both in the list and on the lead card. #}
+<div class="tag-cell" id="lead-tags-{{ lead.id }}">
+  {% for t in lead.tags %}
+    <a class="tag" href="/leads?tag={{ t.name | urlencode }}" style="background:{{ t.color }};color:{{ t.color | text_color }}"
+       title="Все лиды с тегом «{{ t.name }}»">{{ t.name }}</a>
+  {% endfor %}
+  {% if all_tags %}
+  <details class="dropdown" {% if open %}open{% endif %}>
+    <summary title="Изменить теги">✎</summary>
+    <ul>
+      {% set assigned = lead.tags | map(attribute='id') | list %}
+      {% for t in all_tags %}
+      <li><button class="tag-option" hx-post="/leads/{{ lead.id }}/tags/{{ t.id }}"
+                  hx-target="#lead-tags-{{ lead.id }}" hx-swap="outerHTML">
+        {{ '☑' if t.id in assigned else '☐' }}
+        <span class="tag" style="background:{{ t.color }};color:{{ t.color | text_color }}">{{ t.name }}</span>
+      </button></li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+</div>

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ lead.name }} — Mini CRM{% endblock %}
+{% block content %}
+<p><a href="/leads">&larr; Все лиды</a></p>
+<article>
+  <header style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+    <div>
+      <h3 style="margin:0">{{ lead.name }} <span class="badge {{ lead.status.value }}">{{ STATUS_LABELS[lead.status] }}</span></h3>
+      <span class="muted small">Лид #{{ lead.id }} · {{ SOURCE_LABELS[lead.source] }}</span>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <a href="/leads/{{ lead.id }}/edit" role="button" class="outline">Редактировать</a>
+      <form method="post" action="/leads/{{ lead.id }}/delete" style="margin:0"
+            onsubmit="return confirm('Удалить лид и всю историю?')">
+        <button class="outline secondary">Удалить</button>
+      </form>
+    </div>
+  </header>
+  <table>
+    <tbody>
+      <tr><th scope="row" style="width:12rem">Контакт</th><td>{{ lead.contact }}</td></tr>
+      {% if lead.telegram_user_id %}<tr><th scope="row">Telegram ID</th><td><code>{{ lead.telegram_user_id }}</code></td></tr>{% endif %}
+      <tr><th scope="row">Запрос</th><td style="white-space:pre-wrap">{{ lead.request or '—' }}</td></tr>
+      <tr><th scope="row">Теги</th><td>{% with open=False %}{% include "partials/lead_tags.html" %}{% endwith %}
+        {% if not all_tags %}<span class="muted small">Тегов пока нет — <a href="/tags">создать</a></span>{% endif %}</td></tr>
+      <tr><th scope="row">Создан</th><td>{{ lead.created_at | dt }}</td></tr>
+      <tr><th scope="row">Обновлён</th><td>{{ lead.updated_at | dt }}</td></tr>
+    </tbody>
+  </table>
+</article>
+
+<article>
+  <header><strong>История</strong></header>
+  {% include "partials/history.html" %}
+</article>
+{% endblock %}

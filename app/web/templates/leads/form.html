@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Редактирование' if lead else 'Новый лид' }} — Mini CRM{% endblock %}
+{% block content %}
+<p><a href="{{ '/leads/%d' % lead.id if lead else '/leads' }}">&larr; Назад</a></p>
+<article>
+  <header><strong>{{ 'Редактирование лида #%d' % lead.id if lead else 'Новый лид' }}</strong></header>
+  <form method="post" action="{{ '/leads/%d/edit' % lead.id if lead else '/leads/new' }}" novalidate>
+    <div class="grid">
+      <label>Имя *
+        <input name="name" value="{{ form.name }}" required maxlength="255" {% if errors.name %}aria-invalid="true"{% endif %}>
+        {% if errors.name %}<small class="field-error">{{ errors.name }}</small>{% endif %}
+      </label>
+      <label>Контакт * <span class="muted small">(телефон, @username или email)</span>
+        <input name="contact" value="{{ form.contact }}" required maxlength="255" {% if errors.contact %}aria-invalid="true"{% endif %}>
+        {% if errors.contact %}<small class="field-error">{{ errors.contact }}</small>{% endif %}
+      </label>
+    </div>
+    <label>Запрос
+      <textarea name="request" rows="4">{{ form.request }}</textarea>
+    </label>
+    <label>Статус
+      <select name="status" {% if errors.status %}aria-invalid="true"{% endif %}>
+        {% for s in LeadStatus %}<option value="{{ s.value }}" {% if form.status == s.value %}selected{% endif %}>{{ STATUS_LABELS[s] }}</option>{% endfor %}
+      </select>
+      {% if errors.status %}<small class="field-error">{{ errors.status }}</small>{% endif %}
+    </label>
+    <fieldset>
+      <legend>Теги</legend>
+      {% for t in all_tags %}
+        <label style="display:inline-block;margin-right:1rem">
+          <input type="checkbox" name="tag_ids" value="{{ t.id }}" {% if t.id in form.tag_ids %}checked{% endif %}>
+          <span class="tag" style="background:{{ t.color }};color:{{ t.color | text_color }}">{{ t.name }}</span>
+        </label>
+      {% else %}
+        <span class="muted small">Тегов пока нет — <a href="/tags">создать</a></span>
+      {% endfor %}
+    </fieldset>
+    <button type="submit">Сохранить</button>
+  </form>
+</article>
+{% endblock %}

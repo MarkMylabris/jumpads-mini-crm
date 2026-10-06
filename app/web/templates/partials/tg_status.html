@@ -1,0 +1,17 @@
+{# Polled so state changes (reconnects, errors) are visible without reload. #}
+<div id="tg-status" hx-get="/telegram" hx-trigger="every 5s" hx-target="this" hx-swap="outerHTML">
+  <div class="grid">
+    {% for title, st in [("Telegram-бот", bot), ("Личный аккаунт", account)] %}
+    {% set label, color = labels.get(st.status, (st.status, "#9e9e9e")) %}
+    <article style="margin-bottom:1rem">
+      <header><strong>{{ title }}</strong></header>
+      <p style="margin:0"><span class="status-dot" style="background:{{ color }}"></span><strong>{{ label }}</strong></p>
+      {% if st.detail %}<p class="small" style="margin:.3rem 0 0">{{ st.detail }}</p>{% endif %}
+      <p class="small muted" style="margin:.3rem 0 0">Обновлено: {{ st.updated_at | dt("%d.%m %H:%M:%S") }}</p>
+      {% if st.last_error %}
+        <p class="small field-error" style="margin:.3rem 0 0">Последняя ошибка ({{ st.last_error_at | dt("%d.%m %H:%M:%S") }}): {{ st.last_error }}</p>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</div>

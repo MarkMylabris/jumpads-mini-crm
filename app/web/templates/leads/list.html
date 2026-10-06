@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Лиды — Mini CRM{% endblock %}
+{% block content %}
+<hgroup style="display:flex;justify-content:space-between;align-items:center">
+  <h2 style="margin:0">Лиды</h2>
+  <a href="/leads/new" role="button">+ Новый лид</a>
+</hgroup>
+
+<form id="filters" class="filters" method="get" action="/leads"
+      hx-get="/leads" hx-target="#leads-table" hx-swap="outerHTML" hx-push-url="true"
+      hx-trigger="input changed delay:400ms from:input[name=q], change">
+  <input type="search" name="q" value="{{ f.q }}" placeholder="Поиск по имени, контакту, запросу">
+  <select name="source" aria-label="Источник">
+    <option value="">Все источники</option>
+    {% for s in LeadSource %}<option value="{{ s.value }}" {% if f.source == s.value %}selected{% endif %}>{{ SOURCE_LABELS[s] }}</option>{% endfor %}
+  </select>
+  <select name="status" aria-label="Статус">
+    <option value="">Все статусы</option>
+    {% for s in LeadStatus %}<option value="{{ s.value }}" {% if f.status == s.value %}selected{% endif %}>{{ STATUS_LABELS[s] }}</option>{% endfor %}
+  </select>
+  <a href="/leads" role="button" class="secondary outline">Сбросить</a>
+  {% if all_tags %}
+  <fieldset class="tags-filter">
+    <span class="muted small">Теги:</span>
+    {% set selected = f.tags | map('lower') | list %}
+    {% for t in all_tags %}
+      <label><input type="checkbox" name="tag" value="{{ t.name }}" {% if t.name.lower() in selected %}checked{% endif %}>
+        <span class="tag" style="background:{{ t.color }};color:{{ t.color | text_color }}">{{ t.name }}</span></label>
+    {% endfor %}
+    <select name="tag_mode" style="width:auto;margin:0;padding:.2rem 2rem .2rem .5rem;font-size:.85rem">
+      <option value="any" {% if f.tag_mode != 'all' %}selected{% endif %}>любой из</option>
+      <option value="all" {% if f.tag_mode == 'all' %}selected{% endif %}>все сразу</option>
+    </select>
+  </fieldset>
+  {% endif %}
+  <noscript><button type="submit">Применить</button></noscript>
+</form>
+
+{% include "partials/leads_table.html" %}
+{% endblock %}

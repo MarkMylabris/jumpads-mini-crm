@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Подключение Telegram — Mini CRM{% endblock %}
+{% block content %}
+<h2>Подключение Telegram</h2>
+{% include "partials/tg_status.html" %}
+
+{% if error %}<article style="border-left:4px solid var(--pico-del-color)"><strong>Ошибка:</strong> {{ error }}</article>{% endif %}
+
+<article>
+  <header><strong>Личный аккаунт</strong></header>
+  {% set st = account.status %}
+  {% if st == "disabled" %}
+    <p>Чтобы подключить аккаунт, получите <code>api_id</code> и <code>api_hash</code> на
+      <a href="https://my.telegram.org/apps" target="_blank" rel="noopener">my.telegram.org</a>,
+      пропишите их в <code>.env</code> (<code>TG_API_ID</code>, <code>TG_API_HASH</code>) и перезапустите приложение.</p>
+  {% elif st == "awaiting_code" %}
+    <form method="post" action="/telegram/code">
+      <label>Код из Telegram (пришёл на {{ manager.pending_phone }})
+        <input name="code" inputmode="numeric" autocomplete="one-time-code" required autofocus></label>
+      <button type="submit">Войти</button>
+    </form>
+    <form method="post" action="/telegram/cancel"><button class="secondary outline">Изменить номер</button></form>
+  {% elif st == "awaiting_password" %}
+    <form method="post" action="/telegram/password">
+      <label>Пароль двухэтапной аутентификации
+        <input type="password" name="password" autocomplete="current-password" required autofocus></label>
+      <button type="submit">Войти</button>
+    </form>
+    <form method="post" action="/telegram/cancel"><button class="secondary outline">Отмена</button></form>
+  {% elif st in ("running", "reconnecting", "starting") and manager and manager.me_label %}
+    <p>Подключён аккаунт <strong>{{ manager.me_label }}</strong>. Входящие личные сообщения попадают в CRM как лиды.</p>
+    <form method="post" action="/telegram/disconnect"
+          onsubmit="return confirm('Отключить аккаунт? Сессия будет завершена, для повторного подключения понадобится код.')">
+      <button class="secondary">Отключить</button>
+    </form>
+  {% else %}
+    <form method="post" action="/telegram/phone">
+      <label>Номер телефона аккаунта
+        <input name="phone" type="tel" placeholder="+79991234567" autocomplete="tel" required></label>
+      <button type="submit">Получить код</button>
+    </form>
+    <p class="small muted">Код придёт в приложение Telegram на этом аккаунте. Сессия хранится в
+      <code>data/telethon/</code>, после перезапуска повторный вход не нужен.</p>
+  {% endif %}
+</article>
+
+<article>
+  <header><strong>Настройки</strong></header>
+  <form method="post" action="/telegram/settings">
+    <label><input type="checkbox" name="ignore_contacts" value="1" role="switch" {% if ignore_contacts %}checked{% endif %}>
+      Не создавать лиды из людей, которые уже есть в контактах аккаунта</label>
+    <p class="small muted">Сообщения от контактов, у которых уже есть лид, всё равно попадают в его историю.</p>
+    <p class="small muted">Повторное обращение после статуса «Готово»/«Отказ»:
+      <strong>{{ "новый лид" if settings.reopen_policy == "new_lead" else "переоткрыть старый" }}</strong>
+      (настраивается переменной <code>REOPEN_POLICY</code>).</p>
+    <button type="submit" class="outline">Сохранить</button>
+  </form>
+</article>
+{% endblock %}

@@ -1,0 +1,26 @@
+<div id="history">
+  <ul class="history">
+  {% for m in lead.messages %}
+    {% set cls = m.kind.value if m.kind.value != 'message' else m.direction.value %}
+    <li class="{{ cls }}">
+      {% if m.kind.value == 'system' %}
+        {{ m.text }} · {{ m.created_at | dt }}
+      {% else %}
+        <div class="meta">
+          {% if m.kind.value == 'note' %}Заметка{% elif m.direction.value == 'in' %}{{ lead.name }}{% else %}Исходящее{% endif %}
+          · {{ m.created_at | dt }}
+        </div>
+        <div class="text">{{ m.text }}</div>
+      {% endif %}
+    </li>
+  {% else %}
+    <li class="system">Сообщений пока нет</li>
+  {% endfor %}
+  </ul>
+  <form method="post" action="/leads/{{ lead.id }}/notes" hx-post="/leads/{{ lead.id }}/notes"
+        hx-target="#history" hx-swap="outerHTML">
+    <textarea name="text" rows="2" placeholder="Заметка к лиду…" {% if note_error %}aria-invalid="true"{% endif %}></textarea>
+    {% if note_error %}<p class="field-error">{{ note_error }}</p>{% endif %}
+    <button type="submit" class="outline">Добавить заметку</button>
+  </form>
+</div>

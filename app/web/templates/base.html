@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Mini CRM{% endblock %}</title>
+  <link rel="stylesheet" href="/static/pico.min.css">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js" defer></script>
+</head>
+<body>
+{% if request.session.get("user") %}
+<nav class="container top">
+  <ul><li><a href="/leads"><strong>Mini CRM</strong></a></li></ul>
+  <ul>
+    <li><a href="/leads">Лиды</a></li>
+    <li><a href="/tags">Теги</a></li>
+    <li><a href="/telegram">Подключение Telegram</a></li>
+    <li><form method="post" action="/logout" style="margin:0"><button class="outline secondary" style="padding:.3rem .8rem">Выйти</button></form></li>
+  </ul>
+</nav>
+{% endif %}
+<main class="container">
+{% block content %}{% endblock %}
+</main>
+<script>
+  // Close tag dropdowns on outside click (otherwise list polling stays paused).
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('details.dropdown[open]').forEach((d) => { if (!d.contains(e.target)) d.removeAttribute('open'); });
+  });
+</script>
+</body>
+</html>

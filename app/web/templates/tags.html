@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Теги — Mini CRM{% endblock %}
+{% block content %}
+<h2>Теги</h2>
+<article>
+  <header><strong>Новый тег</strong></header>
+  {% set e = errors.get('new', {}) %}
+  <form method="post" action="/tags" class="grid" style="align-items:start">
+    <label>Название <input name="name" value="{{ form.name }}" required maxlength="64" {% if e.name %}aria-invalid="true"{% endif %}>
+      {% if e.name %}<small class="field-error">{{ e.name }}</small>{% endif %}</label>
+    <label>Цвет <input type="color" name="color" value="{{ form.color }}">
+      {% if e.color %}<small class="field-error">{{ e.color }}</small>{% endif %}</label>
+    <label>&nbsp;<button type="submit">Создать</button></label>
+  </form>
+</article>
+
+<table>
+  <thead><tr><th>Тег</th><th>Лидов</th><th>Изменить</th><th></th></tr></thead>
+  <tbody>
+  {% for t in tags %}
+    {% set e = errors.get(t.id, {}) %}
+    <tr>
+      <td><a class="tag" href="/leads?tag={{ t.name | urlencode }}" style="background:{{ t.color }};color:{{ t.color | text_color }}">{{ t.name }}</a></td>
+      <td><a href="/leads?tag={{ t.name | urlencode }}">{{ usage.get(t.id, 0) }}</a></td>
+      <td>
+        <form method="post" action="/tags/{{ t.id }}" role="group" style="margin:0">
+          <input name="name" value="{{ t.name }}" required maxlength="64" aria-label="Название" {% if e.name %}aria-invalid="true"{% endif %}>
+          <input type="color" name="color" value="{{ t.color }}" aria-label="Цвет" style="max-width:4rem">
+          <button type="submit" class="outline">Сохранить</button>
+        </form>
+        {% if e.name %}<small class="field-error">{{ e.name }}</small>{% endif %}
+      </td>
+      <td>
+        <form method="post" action="/tags/{{ t.id }}/delete" style="margin:0"
+              onsubmit='return confirm({{ ("Удалить тег «" ~ t.name ~ "»? Он будет снят со всех лидов.") | tojson }})'>
+          <button class="outline secondary">Удалить</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" class="muted">Тегов пока нет</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

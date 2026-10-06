@@ -1,0 +1,17 @@
+# secrets & runtime data
+.env
+data/
+*.session
+*.session-journal
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# IDE / local docs
+.idea/
+*.docx
+.~lock.*

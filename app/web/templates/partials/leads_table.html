@@ -1,0 +1,34 @@
+{# Polled every 7s so leads from Telegram show up without reload.
+   Polling pauses while a tag dropdown is open so it doesn't close under the cursor. #}
+<div id="leads-table"
+     hx-get="/leads?{{ qs(page=page.page) }}" hx-target="this" hx-swap="outerHTML"
+     hx-trigger="every 7s [!document.querySelector('#leads-table details[open]')]">
+  <p class="muted small">Найдено: {{ page.total }}</p>
+  <div class="overflow-auto">
+  <table class="striped">
+    <thead><tr><th>Имя</th><th>Контакт</th><th>Источник</th><th>Статус</th><th>Теги</th><th>Дата</th></tr></thead>
+    <tbody>
+    {% for lead in page.items %}
+      <tr>
+        <td><a href="/leads/{{ lead.id }}">{{ lead.name }}</a>
+          {% if lead.request %}<div class="muted small">{{ lead.request | truncate(70) }}</div>{% endif %}</td>
+        <td>{{ lead.contact }}</td>
+        <td>{{ SOURCE_LABELS[lead.source] }}</td>
+        <td><span class="badge {{ lead.status.value }}">{{ STATUS_LABELS[lead.status] }}</span></td>
+        <td>{% with open=False %}{% include "partials/lead_tags.html" %}{% endwith %}</td>
+        <td class="small">{{ lead.created_at | dt }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted" style="text-align:center;padding:2rem">Лидов пока нет</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if page.pages > 1 %}
+  <nav class="pagination">
+    {% if page.page > 1 %}<a href="/leads?{{ qs(page=page.page - 1) }}">&larr; Назад</a>{% endif %}
+    <span class="muted">Стр. {{ page.page }} из {{ page.pages }}</span>
+    {% if page.page < page.pages %}<a href="/leads?{{ qs(page=page.page + 1) }}">Вперёд &rarr;</a>{% endif %}
+  </nav>
+  {% endif %}
+</div>
